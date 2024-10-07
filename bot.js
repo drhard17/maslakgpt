@@ -1,6 +1,7 @@
 const { Telegraf } = require('telegraf')
 const { message } = require('telegraf/filters')
-const { G4F } = require("g4f");
+const { G4F } = require("g4f")
+const logger = require('./botlogger.js')
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
@@ -12,6 +13,7 @@ bot.on(message('text'), async (ctx) => {
     ]
     const answer = await g4f.chatCompletion(messages)
     ctx.reply(answer)
+    logger.sendMessage(ctx, answer)
 })
 
 bot.launch()
