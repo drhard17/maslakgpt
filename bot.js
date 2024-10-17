@@ -1,5 +1,5 @@
 const { Telegraf, Markup } = require('telegraf')
-const { message, callbackQuery } = require('telegraf/filters')
+const { message } = require('telegraf/filters')
 const { G4F } = require('g4f')
 const logger = require('./botlogger.js')
 const { models } = require('./models.json')
@@ -56,22 +56,23 @@ bot.command('model', (ctx) => {
 })
 
 bot.on(message('text'), async (ctx) => {
-    console.log('AIactive :>> ', AIactive);
     if (!AIactive) {
         return
     }
     const g4f = new G4F()
     const chat = getChatById(ctx.chat.id)
-    const { messages } = chat
-    const { options } = chat
-
+    const { messages, options } = chat
+    
     messages.push( { role: 'user', content: ctx.message.text } )
+    ctx.sendChatAction('typing')
     const answer = await g4f.chatCompletion(messages, options)
     messages.push( { role: 'assistant', content: answer } )
-    ctx.reply(answer)
+
+    ctx.reply(answer, { parse_mode: 'Markdown' })
+    logger.sendMessage(ctx, answer)
 })
 
-bot.action(/^model_/, ctx => {
+bot.action(/^model_/, (ctx) => {
     const model = ctx.callbackQuery.data.split('__')[1]
     const chat = getChatById(ctx.chat.id)
     chat.options.model = model
@@ -83,18 +84,23 @@ const getChatById = (id) => {
     let chat = chats.find(chat => chat.id === id)
     if (!chat) {
         chats.push(
-            {
-                id,
-                messages: [],
-                options: {
-                    provider: null,
-                    model: ''
-                }
-            }
+            createNewChat(id)
         )
         chat = getChatById(id)
     }
     return chat
+}
+
+const createNewChat = (id) => {
+    return {
+        id,
+        messages: [],
+        options: {
+            provider: null,
+            model: '',
+            markdow: true
+        }
+    }
 }
 
 bot.launch()
