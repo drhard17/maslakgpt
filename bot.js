@@ -2,20 +2,13 @@ const { Telegraf, Markup, session, Scenes } = require('telegraf')
 const { message } = require('telegraf/filters')
 const { BaseScene, Stage } = Scenes
 const { G4F } = require('g4f')
-const logger = require('./botlogger.js')
+const logger = require('./botlogger')
 const { models } = require('./models.json')
 const _ = require('lodash')
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
 const roleScene = new BaseScene('SET_ROLE')
 const stage = new Stage([roleScene])
-
-roleScene.enter((ctx) => ctx.reply('Choose a role'))
-roleScene.hears(/.+/, async (ctx) => {
-    ctx.session.messages = [ { role: 'system', content: ctx.message.text } ]
-    await ctx.reply('New role applied')
-    return ctx.scene.leave()
-})
 
 bot.use(session())
 bot.use((ctx, next) => {
@@ -37,6 +30,13 @@ bot.telegram.setMyCommands([
     { command: 'reset', description: 'Reset conversation context' },
     { command: 'context', description: 'Show conversation context' }
 ])
+
+roleScene.enter((ctx) => ctx.reply('Choose a role'))
+roleScene.hears(/.+/, async (ctx) => {
+    ctx.session.messages = [ { role: 'system', content: ctx.message.text } ]
+    await ctx.reply('New role applied')
+    return ctx.scene.leave()
+})
 
 bot.command('context', async (ctx) => {
     if (!ctx.session.messages.length) {
