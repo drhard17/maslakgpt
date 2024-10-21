@@ -1,52 +1,69 @@
-const { Telegraf, Markup } = require('telegraf')
+const { Telegraf, Markup, session, Scenes } = require('telegraf')
 const { message } = require('telegraf/filters')
+const { BaseScene, Stage } = Scenes
 const { G4F } = require('g4f')
 const logger = require('./botlogger.js')
 const { models } = require('./models.json')
 const _ = require('lodash')
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
-const chats = []
 let AIactive = true
+
+bot.use(session())
+
+bot.use((ctx, next) => {
+    ctx.session ??= {
+        testTapCount: 0,
+        messages: [],
+        options: {
+            provider: null,
+            model: '',
+            markdow: true
+        }
+    }
+    return next()
+})
 
 bot.telegram.setMyCommands([
     { command: 'model', description: 'Choose model' },
     { command: 'role', description: 'Choose bot role' },
-    { command: 'reset', description: 'Reset conversation context' }
+    { command: 'reset', description: 'Reset conversation context' },
+    { command: 'context', description: 'Show conversation context' }
 ])
 
-bot.command('reset', (ctx) => {
-    const chat = getChatById(ctx.chat.id)
-    chat.messages = []
-    ctx.reply('Context cleared')
+bot.command('context', async (ctx) => {
+    if (!ctx.session.messages.length) {
+        return await ctx.reply('EMPTY')
+    }
+    await ctx.reply(
+        ctx.session.messages.map((msg) => {
+            return `*${msg.role}*:\n${msg.content}\n`
+        }).join('\n'),
+        { parse_mode: 'Markdown' }
+    )
 })
 
-bot.command('role', (ctx) => {
-    const chat = getChatById(ctx.chat.id)
-    ctx.reply('Choose a role (type):')
+bot.command('reset', async (ctx) => {
+    ctx.session.messages = []
+    await ctx.reply('Context cleared')
+})
+
+bot.command('role', async (ctx) => {
+    await ctx.reply('Choose a role (type):')
     AIactive = false
 })
 
-bot.on(message('text'), (ctx, next) => {
+bot.on(message('text'), async (ctx, next) => {
     if (AIactive) {
         return next()
     }
-    const chat = getChatById(ctx.chat.id)
-    ctx.reply('New role applied')
-    chat.messages = [ { role: 'system', content: ctx.message } ]
+    await ctx.reply('New role applied')
+    ctx.session.messages = [ { role: 'system', content: ctx.message.text } ]
     AIactive = true
 })
 
-bot.command('provider', (ctx) => {
-    const chat = getChatById(ctx.chat.id)
-    chat.options.provider = g4f.providers.GPT
-})
-
-bot.command('model', (ctx) => {
-    const chat = getChatById(ctx.chat.id)
-    chat.options.model = 'gpt-3.5-turbo'
-    console.log(chat.options.model)
-    return ctx.reply('Choose a model:', {
+bot.command('model', async (ctx) => {
+    return await ctx.reply('Choose a model:', {
         ...Markup.inlineKeyboard(
             _.chunk(
                 models.map((model) => Markup.button.callback(model, `model__${model}`))
@@ -60,48 +77,23 @@ bot.on(message('text'), async (ctx) => {
         return
     }
     const g4f = new G4F()
-    const chat = getChatById(ctx.chat.id)
-    const { messages, options } = chat
+    const { messages, options } = ctx.session
     
     messages.push( { role: 'user', content: ctx.message.text } )
-    ctx.sendChatAction('typing')
+    await ctx.sendChatAction('typing')
     const answer = await g4f.chatCompletion(messages, options)
     messages.push( { role: 'assistant', content: answer } )
 
-    ctx.reply(answer, { parse_mode: 'Markdown' })
+    await ctx.reply(answer, { parse_mode: 'Markdown' })
     logger.sendMessage(ctx, answer)
 })
 
-bot.action(/^model_/, (ctx) => {
+bot.action(/^model_/, async (ctx) => {
     const model = ctx.callbackQuery.data.split('__')[1]
-    const chat = getChatById(ctx.chat.id)
-    chat.options.model = model
-    chat.messages = []
-    return ctx.reply(`Model ${model} selected. Context reset performed`)
+    ctx.session.options.model = model
+    ctx.session.messages = []
+    return await ctx.reply(`Model ${model} selected. Context reset performed`)
 })
-
-const getChatById = (id) => {
-    let chat = chats.find(chat => chat.id === id)
-    if (!chat) {
-        chats.push(
-            createNewChat(id)
-        )
-        chat = getChatById(id)
-    }
-    return chat
-}
-
-const createNewChat = (id) => {
-    return {
-        id,
-        messages: [],
-        options: {
-            provider: null,
-            model: '',
-            markdow: true
-        }
-    }
-}
 
 bot.launch()
 process.once('SIGINT', () => bot.stop('SIGINT'))
