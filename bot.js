@@ -7,22 +7,29 @@ const { models } = require('./models.json')
 const _ = require('lodash')
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
-let AIactive = true
+const roleScene = new BaseScene('SET_ROLE')
+const stage = new Stage([roleScene])
+
+roleScene.enter((ctx) => ctx.reply('Choose a role'))
+roleScene.hears(/.+/, async (ctx) => {
+    ctx.session.messages = [ { role: 'system', content: ctx.message.text } ]
+    await ctx.reply('New role applied')
+    return ctx.scene.leave()
+})
 
 bot.use(session())
-
 bot.use((ctx, next) => {
     ctx.session ??= {
-        testTapCount: 0,
         messages: [],
         options: {
             provider: null,
             model: '',
-            markdow: true
+            markdown: false
         }
     }
     return next()
 })
+bot.use(stage.middleware())
 
 bot.telegram.setMyCommands([
     { command: 'model', description: 'Choose model' },
@@ -48,18 +55,8 @@ bot.command('reset', async (ctx) => {
     await ctx.reply('Context cleared')
 })
 
-bot.command('role', async (ctx) => {
-    await ctx.reply('Choose a role (type):')
-    AIactive = false
-})
-
-bot.on(message('text'), async (ctx, next) => {
-    if (AIactive) {
-        return next()
-    }
-    await ctx.reply('New role applied')
-    ctx.session.messages = [ { role: 'system', content: ctx.message.text } ]
-    AIactive = true
+bot.command('role', (ctx) => {
+    ctx.scene.enter('SET_ROLE')
 })
 
 bot.command('model', async (ctx) => {
@@ -73,12 +70,9 @@ bot.command('model', async (ctx) => {
 })
 
 bot.on(message('text'), async (ctx) => {
-    if (!AIactive) {
-        return
-    }
     const g4f = new G4F()
     const { messages, options } = ctx.session
-    
+
     messages.push( { role: 'user', content: ctx.message.text } )
     await ctx.sendChatAction('typing')
     const answer = await g4f.chatCompletion(messages, options)
