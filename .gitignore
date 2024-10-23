@@ -1,6 +1,6 @@
 .vscode
+.env
 todo.txt
 node_modules
-Dockerfile
 rebuilrestart.sh
 restart.sh

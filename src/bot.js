@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { Telegraf, Markup, session, Scenes } = require('telegraf')
 const { message } = require('telegraf/filters')
 const { BaseScene, Stage } = Scenes
