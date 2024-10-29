@@ -76,9 +76,15 @@ bot.on(message('text'), async (ctx) => {
 
     messages.push( { role: 'user', content: ctx.message.text } )
     await ctx.sendChatAction('typing')
-    const answer = await g4f.chatCompletion(messages, options)
-    messages.push( { role: 'assistant', content: answer } )
 
+    let answer
+    try {
+        answer = await g4f.chatCompletion(messages, options)    
+    } catch (error) {
+        answer = `Сервис GPT недоступен\n${error}`
+    }
+
+    messages.push( { role: 'assistant', content: answer } )
     await ctx.reply(answer, { parse_mode: 'Markdown' })
     logger.sendMessage(ctx, answer)
 })
