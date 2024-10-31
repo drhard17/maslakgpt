@@ -1,14 +1,36 @@
 require('dotenv').config()
-const { Telegraf, Markup, session, Scenes } = require('telegraf')
-const { message } = require('telegraf/filters')
+import { Telegraf, Markup, session, Scenes, Context } from 'telegraf'
+import { message } from 'telegraf/filters'
+import { G4F } from 'g4f'
+import logger from './botlogger'
+import _ from 'lodash'
+import { models } from './models.json'
 const { BaseScene, Stage } = Scenes
-const { G4F } = require('g4f')
-const logger = require('./botlogger')
-const { models } = require('./models.json')
-const _ = require('lodash')
 
-const bot = new Telegraf(process.env.BOT_TOKEN)
-const roleScene = new BaseScene('SET_ROLE')
+interface MySession extends Scenes.SceneSession {
+    messages: {
+        role: string,
+        content: string
+    }[],
+    options: {
+        provider: any,
+        model: string,
+        markdown: boolean
+    }
+}
+
+interface MyContext extends Context {
+	session: MySession
+    scene: Scenes.SceneContextScene<MyContext>
+}
+
+const BOT_TOKEN = process.env.BOT_TOKEN
+if (BOT_TOKEN === undefined) {
+    throw new Error('BOT_TOKEN is not provided')
+}
+const bot = new Telegraf<MyContext>(BOT_TOKEN)
+
+const roleScene = new BaseScene<MyContext>('SET_ROLE')
 const stage = new Stage([roleScene])
 
 bot.use(session())
@@ -34,7 +56,7 @@ bot.telegram.setMyCommands([
 
 roleScene.enter((ctx) => ctx.reply('Choose a role'))
 roleScene.hears(/.+/, async (ctx) => {
-    ctx.session.messages = [ { role: 'system', content: ctx.message.text } ]
+    ctx.session.messages = [ { role: 'system', content: ctx.text } ]
     await ctx.reply('New role applied')
     return ctx.scene.leave()
 })
@@ -76,18 +98,33 @@ bot.on(message('text'), async (ctx) => {
 
     messages.push( { role: 'user', content: ctx.message.text } )
     await ctx.sendChatAction('typing')
-    const answer = await g4f.chatCompletion(messages, options)
-    messages.push( { role: 'assistant', content: answer } )
 
+    let answer
+    try {
+        answer = await g4f.chatCompletion(messages, options)    
+    } catch (error) {
+        answer = `Сервис GPT недоступен\n${error}`
+    }
+    
+    messages.push( { role: 'assistant', content: answer } )
     await ctx.reply(answer, { parse_mode: 'Markdown' })
-    logger.sendMessage(ctx, answer)
+    logger(ctx, answer)
 })
 
 bot.action(/^model_/, async (ctx) => {
-    const model = ctx.callbackQuery.data.split('__')[1]
+    
+    const { callbackQuery } = ctx
+
+    if(!('data' in callbackQuery)) {
+        return await ctx.reply(`Wrong model`)    
+    }
+
+    const model = callbackQuery.data.split('__')[1]    
     ctx.session.options.model = model
     ctx.session.messages = []
+    ctx.answerCbQuery()
     return await ctx.reply(`Model ${model} selected. Context reset performed`)
+
 })
 
 bot.launch()

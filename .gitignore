@@ -1,5 +1,6 @@
 .vscode
 .env
+dist
 todo.txt
 node_modules
 rebuilrestart.sh

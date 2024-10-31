@@ -22,5 +22,10 @@
     "g4f": "^1.4.6",
     "lodash": "^4.17.21",
     "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.12",
+    "@types/node": "^20.17.1",
+    "typescript": "^5.6.3"
   }
 }

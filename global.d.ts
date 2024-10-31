@@ -1,0 +1,1 @@
+declare var BOT_TOKEN: string;
