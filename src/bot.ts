@@ -1,25 +1,26 @@
 require('dotenv').config()
 import { Telegraf, Markup, session, Scenes, Context } from 'telegraf'
 import { message } from 'telegraf/filters'
-import { G4F } from 'g4f'
 import logger from './botlogger'
+import Provider, { Roles } from './providers/Provider'
+import ProviderFactory from './providers/ProviderFactory'
 import _ from 'lodash'
-import { models } from './models.json'
+import setModel from './scenes/setmodel'
 const { BaseScene, Stage } = Scenes
 
-interface MySession extends Scenes.SceneSession {
+export interface MySession extends Scenes.SceneSession {
     messages: {
-        role: string,
+        role: Roles,
         content: string
     }[],
     options: {
-        provider: any,
+        provider: Provider,
         model: string,
         markdown: boolean
     }
 }
 
-interface MyContext extends Context {
+export interface MyContext extends Context {
 	session: MySession
     scene: Scenes.SceneContextScene<MyContext>
 }
@@ -31,14 +32,15 @@ if (BOT_TOKEN === undefined) {
 const bot = new Telegraf<MyContext>(BOT_TOKEN)
 
 const roleScene = new BaseScene<MyContext>('SET_ROLE')
-const stage = new Stage([roleScene])
+
+const stage = new Stage([roleScene, setModel])
 
 bot.use(session())
 bot.use((ctx, next) => {
     ctx.session ??= {
         messages: [],
         options: {
-            provider: null,
+            provider: ProviderFactory.getDefaultProvider(),
             model: '',
             markdown: false
         }
@@ -82,26 +84,22 @@ bot.command('role', (ctx) => {
     ctx.scene.enter('SET_ROLE')
 })
 
-bot.command('model', async (ctx) => {
-    return await ctx.reply('Choose a model:', {
-        ...Markup.inlineKeyboard(
-            _.chunk(
-                models.map((model) => Markup.button.callback(model, `model__${model}`))
-            , 2)
-        )
-    })
+bot.command('model', (ctx) => {
+    console.log('Here model scene')
+    ctx.scene.enter('setmodel')
 })
 
 bot.on(message('text'), async (ctx) => {
-    const g4f = new G4F()
+    
     const { messages, options } = ctx.session
+    const GPTprovider = options.provider
 
     messages.push( { role: 'user', content: ctx.message.text } )
     await ctx.sendChatAction('typing')
 
     let answer
     try {
-        answer = await g4f.chatCompletion(messages, options)    
+        answer = await GPTprovider.createCompletion(messages)    
     } catch (error) {
         answer = `Сервис GPT недоступен\n${error}`
     }
@@ -111,22 +109,7 @@ bot.on(message('text'), async (ctx) => {
     logger(ctx, answer)
 })
 
-bot.action(/^model_/, async (ctx) => {
-    
-    const { callbackQuery } = ctx
-
-    if(!('data' in callbackQuery)) {
-        return await ctx.reply(`Wrong model`)    
-    }
-
-    const model = callbackQuery.data.split('__')[1]    
-    ctx.session.options.model = model
-    ctx.session.messages = []
-    ctx.answerCbQuery()
-    return await ctx.reply(`Model ${model} selected. Context reset performed`)
-
-})
-
 bot.launch()
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
+

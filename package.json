@@ -5,6 +5,7 @@
   "main": "bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && copyfiles -u 1 src/**/*models.json dist/",
     "start": "node src/bot.js"
   },
   "repository": {
@@ -21,11 +22,13 @@
     "dotenv": "^16.4.5",
     "g4f": "^1.4.6",
     "lodash": "^4.17.21",
+    "openai": "^4.69.0",
     "telegraf": "^4.16.3"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.12",
     "@types/node": "^20.17.1",
+    "copyfiles": "^2.4.1",
     "typescript": "^5.6.3"
   }
 }
