@@ -1,24 +1,18 @@
-import { Scenes, Markup } from 'telegraf'
+import { Scenes } from 'telegraf'
 import { MyContext } from '../../bot'
-const { BaseScene, Stage } = Scenes
-import _ from 'lodash'
+import { getChooseKeyboard } from '../../util/keyboards'
 
-const { leave } = Stage;
+const { BaseScene, Stage } = Scenes
+const { leave } = Stage
 
 const setModel = new BaseScene<MyContext>('setmodel')
 
 setModel.enter(async (ctx: MyContext) => {
-    const models: string[] = ctx.session.options.provider.getModels()
-    return await ctx.reply('Choose a model:', {
-        ...Markup.inlineKeyboard(
-            _.chunk(
-                models.map((model) => Markup.button.callback(model, `model__${model}`))
-            , 2)
-        )
-    })
+    const models = ctx.session.options.provider.getModels()
+    return await ctx.reply('Choose a model:', getChooseKeyboard(ctx, models))
 })
 
-setModel.action(/^model_/, async (ctx) => {
+setModel.action(/^callbackName__/, async (ctx) => {
     
     const { callbackQuery } = ctx
 

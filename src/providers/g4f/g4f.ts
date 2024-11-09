@@ -1,4 +1,4 @@
-import Provider, { Roles } from "../Provider"
+import { Provider, Roles } from '../Provider'
 import { G4F } from 'g4f'
 import { models } from './models.json'
 
@@ -10,7 +10,7 @@ class G4Fprovider extends Provider {
         try {
             answer = await g4f.chatCompletion(messages)
         } catch (error) {
-            answer = `Сервис недоступен\n${error}`
+            answer = `Service unavailable\n${error}`
         }
         return answer
     }

@@ -1,12 +1,12 @@
 require('dotenv').config()
-import { Telegraf, Markup, session, Scenes, Context } from 'telegraf'
+import { Telegraf, session, Scenes, Context } from 'telegraf'
 import { message } from 'telegraf/filters'
-import logger from './botlogger'
-import Provider, { Roles } from './providers/Provider'
-import ProviderFactory from './providers/ProviderFactory'
-import _ from 'lodash'
+import { ProviderFactory } from './providers/ProviderFactory'
+import { Provider, Roles } from './providers/Provider'
 import setModel from './scenes/setmodel'
-const { BaseScene, Stage } = Scenes
+import setProvider from './scenes/setprovider'
+import setSystemPrompt from './scenes/setprompt'
+import logger from './util/botlogger'
 
 export interface MySession extends Scenes.SceneSession {
     messages: {
@@ -31,9 +31,11 @@ if (BOT_TOKEN === undefined) {
 }
 const bot = new Telegraf<MyContext>(BOT_TOKEN)
 
-const roleScene = new BaseScene<MyContext>('SET_ROLE')
-
-const stage = new Stage([roleScene, setModel])
+const stage = new Scenes.Stage<MyContext>([
+    setSystemPrompt, 
+    setModel, 
+    setProvider
+])
 
 bot.use(session())
 bot.use((ctx, next) => {
@@ -50,22 +52,16 @@ bot.use((ctx, next) => {
 bot.use(stage.middleware())
 
 bot.telegram.setMyCommands([
-    { command: 'model', description: 'Choose model' },
-    { command: 'role', description: 'Choose bot role' },
+    { command: 'provider', description: 'Choose a provider' },
+    { command: 'model', description: 'Choose a model' },
+    { command: 'prompt', description: 'Pass system prompt' },
     { command: 'reset', description: 'Reset conversation context' },
     { command: 'context', description: 'Show conversation context' }
 ])
 
-roleScene.enter((ctx) => ctx.reply('Choose a role'))
-roleScene.hears(/.+/, async (ctx) => {
-    ctx.session.messages = [ { role: 'system', content: ctx.text } ]
-    await ctx.reply('New role applied')
-    return ctx.scene.leave()
-})
-
 bot.command('context', async (ctx) => {
     if (!ctx.session.messages.length) {
-        return await ctx.reply('EMPTY')
+        return await ctx.reply('The context is empty')
     }
     await ctx.reply(
         ctx.session.messages.map((msg) => {
@@ -80,13 +76,16 @@ bot.command('reset', async (ctx) => {
     await ctx.reply('Context cleared')
 })
 
-bot.command('role', (ctx) => {
-    ctx.scene.enter('SET_ROLE')
+bot.command('prompt', (ctx) => {
+    ctx.scene.enter('setsystemprompt')
 })
 
 bot.command('model', (ctx) => {
-    console.log('Here model scene')
     ctx.scene.enter('setmodel')
+})
+
+bot.command('provider', (ctx) => {
+    ctx.scene.enter('setprovider')
 })
 
 bot.on(message('text'), async (ctx) => {
@@ -101,7 +100,7 @@ bot.on(message('text'), async (ctx) => {
     try {
         answer = await GPTprovider.createCompletion(messages)    
     } catch (error) {
-        answer = `Сервис GPT недоступен\n${error}`
+        answer = `Service unavailable\n${error}`
     }
     
     messages.push( { role: 'assistant', content: answer } )

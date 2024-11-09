@@ -1,6 +1,6 @@
 require('dotenv').config()
 import OpenAI from 'openai'
-import Provider, { Roles } from '../Provider'
+import { Provider, Roles } from '../Provider'
 import { models } from './models.json'
 
 class OpenAIprovider extends Provider {
@@ -16,7 +16,7 @@ class OpenAIprovider extends Provider {
             })
             return completion.choices[0].message.content || 'NULL MSG'
         } catch (error) {
-            return `Сервис OpenAI недоступен\n${error}`
+            return `Service unavailable\n${error}`
         }
     }
 
