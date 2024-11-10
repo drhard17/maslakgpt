@@ -2,7 +2,6 @@ import { Scenes } from 'telegraf'
 import { MyContext } from '../../bot'
 import { ProviderFactory } from '../../providers/ProviderFactory'
 import { getChooseKeyboard } from '../../util/keyboards'
-import { isNull } from 'lodash'
 
 const { BaseScene, Stage } = Scenes
 const { leave } = Stage
@@ -20,17 +19,17 @@ setProvider.action(/^callbackName__/, async (ctx) => {
     const { callbackQuery } = ctx
 
     if(!('data' in callbackQuery)) {
-        return await ctx.reply(`Wrong provider`)    
+        return await ctx.reply(`Wrong callback query`)    
     }
 
     const providerName = callbackQuery.data.split('__')[1]    
     const providerFactory = new ProviderFactory()
-    const provider = providerFactory.getProviderByName(providerName)
-    
-    if(!isNull(provider)) {
+
+    try {
+        const provider = providerFactory.getProviderByName(providerName)
         ctx.session.options.provider = provider
-    } else {
-        return await ctx.reply(`Wrong provider`)
+    } catch (error) {
+        return await ctx.reply(`Wrong provider: ${error}`)
     }
     
     ctx.session.messages = []

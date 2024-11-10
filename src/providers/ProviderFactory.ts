@@ -10,8 +10,12 @@ export class ProviderFactory {
         this.providers.set('G4F', new G4Fprovider())
     }
 
-    getProviderByName(name: string): Provider | null {
-        return this.providers.get(name) || null
+    getProviderByName(name: string): Provider {
+        const provider = this.providers.get(name)
+        if (!provider) {
+            throw new Error(`Incorrect provider name ${name}`)
+        }
+        return provider
     }
 
     static getDefaultProvider(): Provider {
