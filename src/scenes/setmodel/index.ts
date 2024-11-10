@@ -20,11 +20,18 @@ setModel.action(/^callbackName__/, async (ctx) => {
         return await ctx.reply(`Wrong model`)    
     }
 
-    const model = callbackQuery.data.split('__')[1]    
-    ctx.session.options.model = model
+    let { model, provider } = ctx.session.options
+    model = callbackQuery.data.split('__')[1]
+
+    try {
+        provider.setModel(model)    
+    } catch (error) {
+        return await ctx.reply('Wrong model passed')
+    }
+
     ctx.session.messages = []
     ctx.answerCbQuery()
-    await ctx.reply(`Model ${model} selected. Context reset performed`)
+    await ctx.reply(`Model ${model} selected. Context reset performed.`)
     return leave()
 })
 

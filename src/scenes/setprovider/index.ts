@@ -1,4 +1,4 @@
-import { Scenes, Markup } from 'telegraf'
+import { Scenes } from 'telegraf'
 import { MyContext } from '../../bot'
 import { ProviderFactory } from '../../providers/ProviderFactory'
 import { getChooseKeyboard } from '../../util/keyboards'
@@ -35,7 +35,7 @@ setProvider.action(/^callbackName__/, async (ctx) => {
     
     ctx.session.messages = []
     ctx.answerCbQuery()
-    await ctx.reply(`Provider ${providerName} selected. Context reset performed`)
+    await ctx.reply(`Provider ${providerName} selected. Context reset performed.`)
     return leave()
 })
 

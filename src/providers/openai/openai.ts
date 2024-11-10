@@ -11,10 +11,10 @@ class OpenAIprovider extends Provider {
 
         try {
             const completion = await openai.chat.completions.create({
-                model: 'gpt-4o',
+                model: this.model,
                 messages
             })
-            return completion.choices[0].message.content || 'NULL MSG'
+            return completion.choices[0].message.content || 'Service error - null msg'
         } catch (error) {
             return `Service unavailable\n${error}`
         }

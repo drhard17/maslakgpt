@@ -6,9 +6,15 @@ class G4Fprovider extends Provider {
     
     async createCompletion(messages: { role: Roles; content: string; }[]): Promise<string> {
         const g4f = new G4F()
+
+        const options = {
+            provider: g4f.providers.GPT,
+            model: this.model
+        }
+
         let answer
         try {
-            answer = await g4f.chatCompletion(messages)
+            answer = await g4f.chatCompletion(messages, options)
         } catch (error) {
             answer = `Service unavailable\n${error}`
         }

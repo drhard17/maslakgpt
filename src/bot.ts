@@ -39,11 +39,12 @@ const stage = new Scenes.Stage<MyContext>([
 
 bot.use(session())
 bot.use((ctx, next) => {
+    const defaultProvider = ProviderFactory.getDefaultProvider()
     ctx.session ??= {
         messages: [],
         options: {
-            provider: ProviderFactory.getDefaultProvider(),
-            model: '',
+            provider: defaultProvider,
+            model: defaultProvider.getDefaultModel(),
             markdown: false
         }
     }
@@ -91,14 +92,14 @@ bot.command('provider', (ctx) => {
 bot.on(message('text'), async (ctx) => {
     
     const { messages, options } = ctx.session
-    const GPTprovider = options.provider
+    const { provider } = options
 
     messages.push( { role: 'user', content: ctx.message.text } )
     await ctx.sendChatAction('typing')
 
     let answer
     try {
-        answer = await GPTprovider.createCompletion(messages)    
+        answer = await provider.createCompletion(messages, options)    
     } catch (error) {
         answer = `Service unavailable\n${error}`
     }
