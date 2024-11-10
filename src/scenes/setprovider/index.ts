@@ -11,18 +11,20 @@ const setProvider = new BaseScene<MyContext>('setprovider')
 setProvider.enter(async (ctx: MyContext) => {
     const providerFactory = new ProviderFactory()
     const providers: string[] = providerFactory.getAvailableProvidersNames()
-    return await ctx.reply('Choose a provider:', getChooseKeyboard(ctx, providers))
+    return await ctx.reply(
+        'Choose a provider:',
+        getChooseKeyboard(ctx, providers)
+    )
 })
 
 setProvider.action(/^callbackName__/, async (ctx) => {
-    
     const { callbackQuery } = ctx
 
-    if(!('data' in callbackQuery)) {
-        return await ctx.reply(`Wrong callback query`)    
+    if (!('data' in callbackQuery)) {
+        return await ctx.reply(`Wrong callback query`)
     }
 
-    const providerName = callbackQuery.data.split('__')[1]    
+    const providerName = callbackQuery.data.split('__')[1]
     const providerFactory = new ProviderFactory()
 
     try {
@@ -31,10 +33,12 @@ setProvider.action(/^callbackName__/, async (ctx) => {
     } catch (error) {
         return await ctx.reply(`Wrong provider: ${error}`)
     }
-    
+
     ctx.session.messages = []
     ctx.answerCbQuery()
-    await ctx.reply(`Provider ${providerName} selected. Context reset performed.`)
+    await ctx.reply(
+        `Provider ${providerName} selected. Context reset performed.`
+    )
     return leave()
 })
 

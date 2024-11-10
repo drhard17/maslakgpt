@@ -10,18 +10,18 @@ import logger from './util/botlogger'
 
 export interface MySession extends Scenes.SceneSession {
     messages: {
-        role: Roles,
+        role: Roles
         content: string
-    }[],
+    }[]
     options: {
-        provider: Provider,
-        model: string,
+        provider: Provider
+        model: string
         markdown: boolean
     }
 }
 
 export interface MyContext extends Context {
-	session: MySession
+    session: MySession
     scene: Scenes.SceneContextScene<MyContext>
 }
 
@@ -32,8 +32,8 @@ if (BOT_TOKEN === undefined) {
 const bot = new Telegraf<MyContext>(BOT_TOKEN)
 
 const stage = new Scenes.Stage<MyContext>([
-    setSystemPrompt, 
-    setModel, 
+    setSystemPrompt,
+    setModel,
     setProvider
 ])
 
@@ -65,9 +65,11 @@ bot.command('context', async (ctx) => {
         return await ctx.reply('The context is empty')
     }
     await ctx.reply(
-        ctx.session.messages.map((msg) => {
-            return `*${msg.role}*:\n${msg.content}\n`
-        }).join('\n'),
+        ctx.session.messages
+            .map((msg) => {
+                return `*${msg.role}*:\n${msg.content}\n`
+            })
+            .join('\n'),
         { parse_mode: 'Markdown' }
     )
 })
@@ -90,21 +92,20 @@ bot.command('provider', (ctx) => {
 })
 
 bot.on(message('text'), async (ctx) => {
-    
     const { messages, options } = ctx.session
     const { provider } = options
 
-    messages.push( { role: 'user', content: ctx.message.text } )
+    messages.push({ role: 'user', content: ctx.message.text })
     await ctx.sendChatAction('typing')
 
     let answer
     try {
-        answer = await provider.createCompletion(messages, options)    
+        answer = await provider.createCompletion(messages, options)
     } catch (error) {
         answer = `Service unavailable\n${error}`
     }
-    
-    messages.push( { role: 'assistant', content: answer } )
+
+    messages.push({ role: 'assistant', content: answer })
     await ctx.reply(answer, { parse_mode: 'Markdown' })
     logger(ctx, answer)
 })
@@ -112,4 +113,3 @@ bot.on(message('text'), async (ctx) => {
 bot.launch()
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
-

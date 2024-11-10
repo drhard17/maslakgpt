@@ -13,18 +13,17 @@ setModel.enter(async (ctx: MyContext) => {
 })
 
 setModel.action(/^callbackName__/, async (ctx) => {
-    
     const { callbackQuery } = ctx
 
-    if(!('data' in callbackQuery)) {
-        return await ctx.reply(`Wrong model`)    
+    if (!('data' in callbackQuery)) {
+        return await ctx.reply(`Wrong model`)
     }
 
     let { model, provider } = ctx.session.options
     model = callbackQuery.data.split('__')[1]
 
     try {
-        provider.setModel(model)    
+        provider.setModel(model)
     } catch (error) {
         return await ctx.reply('Wrong model passed')
     }

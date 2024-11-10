@@ -6,17 +6,18 @@ export abstract class Provider {
     constructor() {
         this.model = this.getDefaultModel()
     }
-    
-    abstract createCompletion(messages: {
-        role: Roles,
-        content: string,
-        name?: string
-    }[],
+
+    abstract createCompletion(
+        messages: {
+            role: Roles
+            content: string
+            name?: string
+        }[],
         options: {}
     ): Promise<string>
 
     abstract getModels(): string[]
-    
+
     getDefaultModel(): string {
         return this.getModels()[0]
     }

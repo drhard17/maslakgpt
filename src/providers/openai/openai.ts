@@ -4,9 +4,9 @@ import { Provider, Roles } from '../Provider'
 import { models } from './models.json'
 
 class OpenAIprovider extends Provider {
-
-    async createCompletion(messages: { role: Roles; content: string; name?: string }[]): Promise<string> {
-
+    async createCompletion(
+        messages: { role: Roles; content: string; name?: string }[]
+    ): Promise<string> {
         const openai = new OpenAI()
 
         try {
@@ -14,7 +14,10 @@ class OpenAIprovider extends Provider {
                 model: this.model,
                 messages
             })
-            return completion.choices[0].message.content || 'Service error - null msg'
+            return (
+                completion.choices[0].message.content ||
+                'Service error - null msg'
+            )
         } catch (error) {
             return `Service unavailable\n${error}`
         }

@@ -25,9 +25,6 @@ export class ProviderFactory {
     }
 
     getAvailableProvidersNames(): string[] {
-        return Array.from(
-            this.providers.keys()
-        )
+        return Array.from(this.providers.keys())
     }
 }
-

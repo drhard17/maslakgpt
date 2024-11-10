@@ -12,8 +12,7 @@ const sendMessage = (ctx: Context, answer: string) => {
     }
     const { username, first_name, last_name } = ctx.message.from
 
-    const msg =
-        `*${username} (${first_name} ${last_name}):*\n
+    const msg = `*${username} (${first_name} ${last_name}):*\n
         ${ctx.text}\n
         *Bot:*\n
         ${answer}`
