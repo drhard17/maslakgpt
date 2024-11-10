@@ -1,6 +1,7 @@
 import { Provider } from './Provider'
 import G4Fprovider from './g4f/g4f'
 import OpenAIprovider from './openai/openai'
+import RaspGPTprovider from './raspGPT/RaspGPT'
 
 export class ProviderFactory {
     private providers: Map<string, Provider>
@@ -8,6 +9,7 @@ export class ProviderFactory {
         this.providers = new Map()
         this.providers.set('OpenAI', new OpenAIprovider())
         this.providers.set('G4F', new G4Fprovider())
+        this.providers.set('RaspGPT', new RaspGPTprovider())
     }
 
     getProviderByName(name: string): Provider {
