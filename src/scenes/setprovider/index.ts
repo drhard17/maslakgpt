@@ -1,5 +1,5 @@
 import { Scenes } from 'telegraf'
-import { MyContext } from '../../bot'
+import { MyContext } from '../../SessionContext'
 import { ProviderFactory } from '../../providers/ProviderFactory'
 import { getChooseKeyboard } from '../../util/keyboards'
 
@@ -11,10 +11,7 @@ const setProvider = new BaseScene<MyContext>('setprovider')
 setProvider.enter(async (ctx: MyContext) => {
     const providerFactory = new ProviderFactory()
     const providers: string[] = providerFactory.getAvailableProvidersNames()
-    return await ctx.reply(
-        'Choose a provider:',
-        getChooseKeyboard(ctx, providers)
-    )
+    return await ctx.reply('Choose a provider:', getChooseKeyboard(providers))
 })
 
 setProvider.action(/^callbackName__/, async (ctx) => {
@@ -26,7 +23,9 @@ setProvider.action(/^callbackName__/, async (ctx) => {
 
     const providerName = callbackQuery.data.split('__')[1]
     ctx.session.options.providerName = providerName
-    const model = new ProviderFactory().getProviderByName(providerName).getDefaultModel()
+    const model = new ProviderFactory()
+        .getProviderByName(providerName)
+        .getDefaultModel()
     ctx.session.options.model = model
     ctx.session.messages = []
 

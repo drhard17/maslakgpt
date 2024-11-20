@@ -1,8 +1,7 @@
 import { Markup } from 'telegraf'
-import { MyContext } from '../bot'
 import _ from 'lodash'
 
-export const getChooseKeyboard = (ctx: MyContext, keys: string[]) => {
+export const getChooseKeyboard = (keys: string[]) => {
     return {
         ...Markup.inlineKeyboard(
             _.chunk(

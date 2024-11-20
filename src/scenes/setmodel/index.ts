@@ -1,5 +1,5 @@
 import { Scenes } from 'telegraf'
-import { MyContext } from '../../bot'
+import { MyContext } from '../../SessionContext'
 import { getChooseKeyboard } from '../../util/keyboards'
 import { ProviderFactory } from '../../providers/ProviderFactory'
 
@@ -11,7 +11,7 @@ setModel.enter(async (ctx: MyContext) => {
     const factory = new ProviderFactory()
     const provider = factory.getProviderByName(ctx.session.options.providerName)
     const models = provider.getModels()
-    return await ctx.reply('Choose a model:', getChooseKeyboard(ctx, models))
+    return await ctx.reply('Choose a model:', getChooseKeyboard(models))
 })
 
 setModel.action(/^callbackName__/, async (ctx) => {

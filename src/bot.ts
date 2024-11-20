@@ -2,31 +2,13 @@ require('dotenv').config()
 import { Telegraf, Scenes, Context } from 'telegraf'
 import { message } from 'telegraf/filters'
 import { ProviderFactory } from './providers/ProviderFactory'
-import { Provider, Roles } from './providers/Provider'
 import setModel from './scenes/setmodel'
 import setProvider from './scenes/setprovider'
 import setSystemPrompt from './scenes/setprompt'
 import logger from './util/botlogger'
-
 import { MongoClient, ServerApiVersion } from 'mongodb'
 import { session } from 'telegraf-session-mongodb'
-
-export interface MySession extends Scenes.SceneSession {
-    messages: {
-        role: Roles
-        content: string
-    }[]
-    options: {
-        providerName: string
-        model: string
-        markdown: boolean
-    }
-}
-
-export interface MyContext extends Context {
-    session: MySession
-    scene: Scenes.SceneContextScene<MyContext>
-}
+import { initSession, MyContext } from './SessionContext'
 
 const BOT_TOKEN = process.env.BOT_TOKEN
 if (BOT_TOKEN === undefined) {
@@ -55,12 +37,13 @@ MongoClient.connect(MONGODB_URI, {
     const db = client.db()
     bot.use(session(db, { sessionName: 'session', collectionName: 'sessions' }))
     bot.use((ctx, next) => {
-        ctx.session.messages ??= []
-        ctx.session.options ??= {
-            providerName: 'OpenAI',
-            model: 'gpt-4o',
-            markdown: false
-        }
+        // ctx.session.messages ??= []
+        // ctx.session.options ??= {
+        //     providerName: 'OpenAI',
+        //     model: 'gpt-4o',
+        //     markdown: false
+        // }
+        ctx = initSession(ctx)
         return next()
     })
     bot.use(stage.middleware())

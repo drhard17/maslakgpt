@@ -1,5 +1,5 @@
 import { Scenes } from 'telegraf'
-import { MyContext } from '../../bot'
+import { MyContext } from '../../SessionContext'
 
 const { BaseScene } = Scenes
 
