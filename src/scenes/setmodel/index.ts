@@ -1,14 +1,16 @@
 import { Scenes } from 'telegraf'
 import { MyContext } from '../../bot'
 import { getChooseKeyboard } from '../../util/keyboards'
+import { ProviderFactory } from '../../providers/ProviderFactory'
 
 const { BaseScene, Stage } = Scenes
 const { leave } = Stage
-
 const setModel = new BaseScene<MyContext>('setmodel')
 
 setModel.enter(async (ctx: MyContext) => {
-    const models = ctx.session.options.provider.getModels()
+    const factory = new ProviderFactory()
+    const provider = factory.getProviderByName(ctx.session.options.providerName)
+    const models = provider.getModels()
     return await ctx.reply('Choose a model:', getChooseKeyboard(ctx, models))
 })
 
@@ -19,14 +21,11 @@ setModel.action(/^callbackName__/, async (ctx) => {
         return await ctx.reply(`Wrong model`)
     }
 
-    let { model, provider } = ctx.session.options
-    model = callbackQuery.data.split('__')[1]
+    const model = callbackQuery.data.split('__')[1]
 
-    try {
-        provider.setModel(model)
-    } catch (error) {
-        return await ctx.reply('Wrong model passed')
-    }
+    //...add model checking
+
+    ctx.session.options.model = model
 
     ctx.session.messages = []
     ctx.answerCbQuery()

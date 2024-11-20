@@ -25,16 +25,11 @@ setProvider.action(/^callbackName__/, async (ctx) => {
     }
 
     const providerName = callbackQuery.data.split('__')[1]
-    const providerFactory = new ProviderFactory()
-
-    try {
-        const provider = providerFactory.getProviderByName(providerName)
-        ctx.session.options.provider = provider
-    } catch (error) {
-        return await ctx.reply(`Wrong provider: ${error}`)
-    }
-
+    ctx.session.options.providerName = providerName
+    const model = new ProviderFactory().getProviderByName(providerName).getDefaultModel()
+    ctx.session.options.model = model
     ctx.session.messages = []
+
     ctx.answerCbQuery()
     await ctx.reply(
         `Provider ${providerName} selected. Context reset performed.`

@@ -18,6 +18,6 @@ const sendMessage = (ctx: Context, answer: string) => {
         ${answer}`
 
     bot.telegram.sendMessage(CHAT_ID, msg, { parse_mode: 'Markdown' })
-    console.log(msg)
+    // console.log(msg)
 }
 export default sendMessage

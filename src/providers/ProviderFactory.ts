@@ -24,6 +24,10 @@ export class ProviderFactory {
         return new OpenAIprovider()
     }
 
+    static getDefaultProviderName(): string {
+        return 'OpenAI'
+    }
+
     getAvailableProvidersNames(): string[] {
         return Array.from(this.providers.keys())
     }

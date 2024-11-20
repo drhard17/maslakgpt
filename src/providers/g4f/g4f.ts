@@ -4,18 +4,19 @@ import { models } from './models.json'
 
 class G4Fprovider extends Provider {
     async createCompletion(
-        messages: { role: Roles; content: string }[]
+        messages: { role: Roles; content: string }[],
+        options: { model: string }
     ): Promise<string> {
         const g4f = new G4F()
 
-        const options = {
+        const g4fOptions = {
             provider: g4f.providers.GPT,
-            model: this.model
+            model: options.model
         }
 
         let answer
         try {
-            answer = await g4f.chatCompletion(messages, options)
+            answer = await g4f.chatCompletion(messages, g4fOptions)
         } catch (error) {
             answer = `Service unavailable\n${error}`
         }
