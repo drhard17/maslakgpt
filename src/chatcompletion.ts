@@ -1,7 +1,7 @@
 import { ProviderFactory } from './providers/ProviderFactory'
 import logger from './util/botlogger'
 
-export const createCompletion = async (ctx: any) => {
+export const createCompletion = async (ctx: any): Promise<void> => {
     const { messages, options } = ctx.session
     const { providerName } = options
     const factory = new ProviderFactory()

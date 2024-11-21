@@ -81,7 +81,7 @@ MongoClient.connect(MONGODB_URI, {
     })
 
     bot.on(message('text'), async (ctx) => {
-        createCompletion(ctx)
+        await createCompletion(ctx)
     })
 
     bot.launch()
