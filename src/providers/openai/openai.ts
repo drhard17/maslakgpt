@@ -5,13 +5,12 @@ import { models } from './models.json'
 
 class OpenAIprovider extends Provider {
     async createCompletion(
-        messages: { role: Roles; content: string; name?: string }[],
-        options: { model: string }
+        messages: { role: Roles; content: string; name?: string }[]
     ): Promise<string> {
         const openai = new OpenAI()
         try {
             const completion = await openai.chat.completions.create({
-                model: options.model,
+                model: this.model,
                 messages
             })
             return (

@@ -4,14 +4,13 @@ import { models } from './models.json'
 
 class G4Fprovider extends Provider {
     async createCompletion(
-        messages: { role: Roles; content: string }[],
-        options: { model: string }
+        messages: { role: Roles; content: string }[]
     ): Promise<string> {
         const g4f = new G4F()
 
         const g4fOptions = {
             provider: g4f.providers.GPT,
-            model: options.model
+            model: this.model
         }
 
         let answer

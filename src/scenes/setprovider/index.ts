@@ -10,7 +10,7 @@ const setProvider = new BaseScene<MyContext>('setprovider')
 
 setProvider.enter(async (ctx: MyContext) => {
     const providerFactory = new ProviderFactory()
-    const providers: string[] = providerFactory.getAvailableProvidersNames()
+    const providers = providerFactory.getAvailableProvidersNames()
     return await ctx.reply('Choose a provider:', getChooseKeyboard(providers))
 })
 

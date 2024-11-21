@@ -1,5 +1,6 @@
 import { Scenes, Context } from 'telegraf'
-import { Roles } from './providers/Provider'
+import { Provider, Roles } from './providers/Provider'
+import { ProviderFactory } from './providers/ProviderFactory'
 
 export interface MySession extends Scenes.SceneSession {
     messages: {
@@ -16,6 +17,7 @@ export interface MySession extends Scenes.SceneSession {
 export interface MyContext extends Context {
     session: MySession
     scene: Scenes.SceneContextScene<MyContext>
+    provider: Provider
 }
 
 export const initSession = (ctx: MyContext) => {
@@ -25,4 +27,8 @@ export const initSession = (ctx: MyContext) => {
         model: 'gpt-4o',
         markdown: false
     }
+    ctx.provider = new ProviderFactory().getProviderByName(
+        ctx.session.options.providerName
+    )
+    ctx.provider.setModel(ctx.session.options.model)
 }
