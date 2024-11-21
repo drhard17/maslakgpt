@@ -1,14 +1,13 @@
 require('dotenv').config()
-import { Telegraf, Scenes, Context } from 'telegraf'
+import { Telegraf, Scenes } from 'telegraf'
 import { message } from 'telegraf/filters'
-import { ProviderFactory } from './providers/ProviderFactory'
 import setModel from './scenes/setmodel'
 import setProvider from './scenes/setprovider'
 import setSystemPrompt from './scenes/setprompt'
-import logger from './util/botlogger'
 import { MongoClient, ServerApiVersion } from 'mongodb'
 import { session } from 'telegraf-session-mongodb'
 import { initSession, MyContext } from './SessionContext'
+import { createCompletion } from './chatcompletion'
 
 const BOT_TOKEN = process.env.BOT_TOKEN
 if (BOT_TOKEN === undefined) {
@@ -37,13 +36,7 @@ MongoClient.connect(MONGODB_URI, {
     const db = client.db()
     bot.use(session(db, { sessionName: 'session', collectionName: 'sessions' }))
     bot.use((ctx, next) => {
-        // ctx.session.messages ??= []
-        // ctx.session.options ??= {
-        //     providerName: 'OpenAI',
-        //     model: 'gpt-4o',
-        //     markdown: false
-        // }
-        ctx = initSession(ctx)
+        initSession(ctx)
         return next()
     })
     bot.use(stage.middleware())
@@ -88,25 +81,7 @@ MongoClient.connect(MONGODB_URI, {
     })
 
     bot.on(message('text'), async (ctx) => {
-        const { messages, options } = ctx.session
-        const { providerName } = options
-
-        const factory = new ProviderFactory()
-        const provider = factory.getProviderByName(providerName)
-
-        messages.push({ role: 'user', content: ctx.message.text })
-        await ctx.sendChatAction('typing')
-
-        let answer
-        try {
-            answer = await provider.createCompletion(messages, options)
-        } catch (error) {
-            answer = `Service unavailable\n${error}`
-        }
-
-        messages.push({ role: 'assistant', content: answer })
-        await ctx.reply(answer, { parse_mode: 'Markdown' })
-        logger(ctx, answer)
+        createCompletion(ctx)
     })
 
     bot.launch()

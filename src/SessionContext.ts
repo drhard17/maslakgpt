@@ -25,5 +25,4 @@ export const initSession = (ctx: MyContext) => {
         model: 'gpt-4o',
         markdown: false
     }
-    return ctx
 }
