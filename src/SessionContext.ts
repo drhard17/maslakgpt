@@ -1,11 +1,16 @@
 import { Scenes, Context } from 'telegraf'
-import { Roles } from './providers/Provider'
+
+type AllRoles = 'system' | 'user' | 'assistant' | 'tool' | 'function'
+type Roles = Exclude<AllRoles, 'tool' | 'function'>
+
+export type Messages = {
+    role: Roles
+    content: string
+    name?: string
+}[]
 
 export interface MySession extends Scenes.SceneSession {
-    messages: {
-        role: Roles
-        content: string
-    }[]
+    messages: Messages
     options: {
         providerName: string
         model: string

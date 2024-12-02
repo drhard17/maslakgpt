@@ -1,12 +1,8 @@
-export type Roles = 'system' | 'user' | 'assistant' // | 'tool' | 'function'
+import { Messages } from '../SessionContext'
 
 export abstract class Provider {
     abstract createCompletion(
-        messages: {
-            role: Roles
-            content: string
-            name?: string
-        }[],
+        messages: Messages,
         options: {
             model: string
         }
