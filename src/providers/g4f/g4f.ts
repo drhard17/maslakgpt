@@ -1,10 +1,11 @@
-import { Provider, Roles } from '../Provider'
+import { Provider } from '../Provider'
 import { G4F } from 'g4f'
 import { models } from './models.json'
+import { Messages } from '../../SessionContext'
 
 class G4Fprovider extends Provider {
     async createCompletion(
-        messages: { role: Roles; content: string }[],
+        messages: Messages,
         options: { model: string }
     ): Promise<string> {
         const g4f = new G4F()

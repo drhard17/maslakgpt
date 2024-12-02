@@ -1,10 +1,9 @@
-import { Provider, Roles } from '../Provider'
+import { Provider } from '../Provider'
+import { Messages } from '../../SessionContext'
 import { models } from './models.json'
 
 class RaspGPTprovider extends Provider {
-    async createCompletion(
-        messages: { role: Roles; content: string }[]
-    ): Promise<string> {
+    async createCompletion(messages: Messages): Promise<string> {
         throw new Error('No completion implementation')
     }
 
