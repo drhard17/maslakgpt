@@ -1,11 +1,11 @@
 import { Provider } from '../Provider'
 import { G4F } from 'g4f'
 import { models } from './models.json'
-import { Messages } from '../../SessionContext'
+import { Message } from '../../SessionContext'
 
 class G4Fprovider extends Provider {
     async createCompletion(
-        messages: Messages,
+        messages: Message[],
         options: { model: string }
     ): Promise<string> {
         const g4f = new G4F()

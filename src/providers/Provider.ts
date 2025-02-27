@@ -1,8 +1,8 @@
-import { Messages } from '../SessionContext'
+import { Message } from '../SessionContext'
 
 export abstract class Provider {
     abstract createCompletion(
-        messages: Messages,
+        messages: Message[],
         options: {
             model: string
         }

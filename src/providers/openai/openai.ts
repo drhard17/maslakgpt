@@ -2,11 +2,11 @@ require('dotenv').config()
 import OpenAI from 'openai'
 import { Provider } from '../Provider'
 import { models } from './models.json'
-import { Messages } from '../../SessionContext'
+import { Message } from '../../SessionContext'
 
 class OpenAIprovider extends Provider {
     async createCompletion(
-        messages: Messages,
+        messages: Message[],
         options: { model: string }
     ): Promise<string> {
         const openai = new OpenAI()

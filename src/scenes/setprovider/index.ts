@@ -27,7 +27,6 @@ setProvider.action(/^callbackName__/, async (ctx) => {
         .getProviderByName(providerName)
         .getDefaultModel()
     ctx.session.options.model = model
-    ctx.session.messages = []
 
     ctx.answerCbQuery()
     await ctx.reply(

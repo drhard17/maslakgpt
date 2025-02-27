@@ -50,11 +50,19 @@ MongoClient.connect(MONGODB_URI, {
     ])
 
     bot.command('context', async (ctx) => {
-        if (!ctx.session.messages.length) {
+        const messages = ctx.session.conversations.at(-1)?.messages
+        if (!messages) {
             return await ctx.reply('The context is empty')
         }
+        console.log(
+            messages
+                .map((msg) => {
+                    return `*${msg.role}*:\n${msg.content}\n`
+                })
+                .join('\n')
+        )
         await ctx.reply(
-            ctx.session.messages
+            messages
                 .map((msg) => {
                     return `*${msg.role}*:\n${msg.content}\n`
                 })
@@ -64,8 +72,16 @@ MongoClient.connect(MONGODB_URI, {
     })
 
     bot.command('reset', async (ctx) => {
-        ctx.session.messages = []
-        await ctx.reply('Context cleared')
+        const currentConversation = ctx.session.conversations.at(-1)
+        if (currentConversation) {
+            currentConversation.current = false
+        }
+        ctx.session.conversations.push({
+            tag: 'next conversation',
+            current: true,
+            messages: []
+        })
+        await ctx.reply('New conversation created, context cleared')
     })
 
     bot.command('prompt', (ctx) => {

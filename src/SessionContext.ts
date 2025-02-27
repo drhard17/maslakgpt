@@ -3,14 +3,20 @@ import { Scenes, Context } from 'telegraf'
 type AllRoles = 'system' | 'user' | 'assistant' | 'tool' | 'function'
 type Roles = Exclude<AllRoles, 'tool' | 'function'>
 
-export type Messages = {
+export type Message = {
     role: Roles
     content: string
     name?: string
-}[]
+}
+
+export type Conversation = {
+    tag: string
+    current: boolean
+    messages: Message[]
+}
 
 export interface MySession extends Scenes.SceneSession {
-    messages: Messages
+    conversations: Conversation[]
     options: {
         providerName: string
         model: string
@@ -24,7 +30,13 @@ export interface MyContext extends Context {
 }
 
 export const initSession = (ctx: MyContext) => {
-    ctx.session.messages ??= []
+    ctx.session.conversations ??= [
+        {
+            tag: 'start',
+            current: true,
+            messages: []
+        }
+    ]
     ctx.session.options ??= {
         providerName: 'OpenAI',
         model: 'gpt-4o',

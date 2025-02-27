@@ -27,7 +27,6 @@ setModel.action(/^callbackName__/, async (ctx) => {
 
     ctx.session.options.model = model
 
-    ctx.session.messages = []
     ctx.answerCbQuery()
     await ctx.reply(`Model ${model} selected. Context reset performed.`)
     return leave()
