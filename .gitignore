@@ -3,5 +3,5 @@
 dist
 todo.txt
 node_modules
-rebuilrestart.sh
+rebuildrestart.sh
 restart.sh
