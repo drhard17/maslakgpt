@@ -1,4 +1,3 @@
-require('dotenv').config()
 import OpenAI from 'openai'
 import { Provider } from '../Provider'
 import { models } from './models.json'
