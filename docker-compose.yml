@@ -5,6 +5,9 @@
           restart: unless-stopped
           build:
             context: ./
+          env_file: .env
+          environment:
+            MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@maslakgpt_storage:27017/maslakgptsessions
           networks:
             - mgpt-network
 
@@ -17,9 +20,12 @@
           networks:
             - mgpt-network
           env_file: .env
-          environment:
-            MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@maslakgpt_storage:27017/maslakgptsessions
+          volumes:
+            - mgpt-mongo-storage:/data/db
             
       networks:
         mgpt-network:
           driver: bridge
+
+      volumes:
+        mgpt-mongo-storage:
