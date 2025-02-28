@@ -6,7 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "tsc && copyfiles -u 1 src/**/*models.json dist/",
-        "start": "node src/bot.js"
+        "start": "node dist/bot.js"
     },
     "repository": {
         "type": "git",
@@ -19,7 +19,6 @@
     },
     "homepage": "https://github.com/drhard17/maslakgpt#readme",
     "dependencies": {
-        "dotenv": "^16.4.5",
         "g4f": "^1.4.6",
         "lodash": "^4.17.21",
         "mongodb": "^6.10.0",
