@@ -1,4 +1,4 @@
-require('dotenv').config()
+// require('dotenv').config()
 import { Telegraf, Scenes } from 'telegraf'
 import { message } from 'telegraf/filters'
 import setModel from './scenes/setmodel'

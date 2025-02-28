@@ -10,7 +10,7 @@ RUN npm run build
 FROM node:alpine AS production
 WORKDIR /app
 COPY package*.json .
-COPY .env ./
+# COPY .env ./
 RUN npm ci --only=production
 COPY --from=build /app/dist ./dist
 CMD ["node", "dist/bot.js"]
