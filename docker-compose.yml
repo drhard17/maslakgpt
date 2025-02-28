@@ -1,0 +1,25 @@
+      version: '3.8'
+      services:
+        bot:
+          container_name: maslakgpt_bot
+          restart: unless-stopped
+          build:
+            context: ./
+          networks:
+            - mgpt-network
+
+        storage:
+          image: mongo
+          container_name: maslakgpt_storage
+          restart: unless-stopped
+          ports:
+            - "127.0.0.1:27017:27017"
+          networks:
+            - mgpt-network
+          env_file: .env
+          environment:
+            MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@maslakgpt_storage:27017/maslakgptsessions
+            
+      networks:
+        mgpt-network:
+          driver: bridge
