@@ -4,6 +4,8 @@ import { MyContext } from './SessionContext'
 import { Message, Update } from 'telegraf/types'
 import { NarrowedContext } from 'telegraf'
 
+const MESSAGES_IN_CONTEXT : number = 10 
+
 export const createCompletion = async (
     ctx: NarrowedContext<
         MyContext,
@@ -23,11 +25,13 @@ export const createCompletion = async (
     const provider = factory.getProviderByName(providerName)
 
     messages.push({ role: 'user', content: ctx.message.text })
+    const limitedMessageContext = messages.slice(-1 * MESSAGES_IN_CONTEXT)
+    console.log(limitedMessageContext)
     await ctx.sendChatAction('typing')
 
     let answer
     try {
-        answer = await provider.createCompletion(messages, options)
+        answer = await provider.createCompletion(limitedMessageContext, options)
     } catch (error) {
         answer = `Service unavailable\n${error}`
     }
