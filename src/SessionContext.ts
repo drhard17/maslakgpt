@@ -39,7 +39,7 @@ export const initSession = (ctx: MyContext) => {
     ]
     ctx.session.options ??= {
         providerName: 'OpenAI',
-        model: 'gpt-4o',
+        model: 'gpt-4.1',
         markdown: false
     }
 }
