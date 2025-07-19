@@ -1,5 +1,6 @@
 import { ProviderFactory } from './providers/ProviderFactory'
-import logger from './util/botlogger'
+import tgLogger from './util/botlogger'
+import logger from './util/logger'
 import { MyContext } from './SessionContext'
 import { Message, Update } from 'telegraf/types'
 import { NarrowedContext } from 'telegraf'
@@ -31,8 +32,9 @@ export const createCompletion = async (
     } catch (error) {
         answer = `Service unavailable\n${error}`
     }
-    messages.push({ role: 'assistant', content: answer })
+    messages.push({ role: 'assistant', content: answer})
     await ctx.reply(answer, { parse_mode: 'Markdown' })
 
-    logger(ctx, answer)
+    logger.info(answer)
+    tgLogger(ctx, answer)
 }

@@ -5,3 +5,4 @@ todo.txt
 node_modules
 rebuildrestart.sh
 restart.sh
+*.log
